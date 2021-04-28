@@ -1,0 +1,15 @@
+resource "aws_ebs_volume" "ebs_volume" {
+  availability_zone = "eu-west-2"
+  size              = 512
+  type              = "gp2"
+
+  tags = {
+    Name = "ebs-volume"
+  }
+}
+
+resource "aws_volume_attachment" "ebc_volume_attachment" {
+  device_name = "/dev/sda"
+  volume_id   = aws_ebs_volume.ebs_volume.id
+  instance_id = aws_instance.ebs_instance_example.id
+}

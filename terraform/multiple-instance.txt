@@ -1,0 +1,67 @@
+MULTIPLE INSTANCE creation : 4 instnace+4subnet+4VPC
+STEP 1: 
+# vi main.tf
+provider "aws" {
+    region =   var.aws_region
+    profile = var.profile
+}
+
+resource "aws_instance" "ec2" {
+  ami           = var.ec2_ami
+  instance_type = var.instance_type
+  key_name = var.ec2_keypair
+  count = var.ec2_count
+  vpc_ids = element(var.vpc_id, count.index)
+  subnet_id = element(var.subnets, count.index)
+
+  tags = {
+    Name = "${var.environment}.${var.product}-${count.index+1}"
+  }
+}
+----------------------------------------------------------------------------------------------------------------
+STEP 2:
+# vi variable.tf
+variable "aws_region" {
+  default = "eu-west-2"
+}
+
+variable "profile" {
+  default = "xpresso"
+}
+
+variable "ec2_ami" {
+  default = "ami-06178cf087598769c"
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+variable "ec2_keypair" {
+  default = "xpresso_key"
+}
+
+variable "ec2_count" {
+  type = number
+  default = "4"
+}
+
+variable "environment" {
+  default = "dev"
+}
+
+variable "product" {
+  default = "xpress0"
+}
+variable "vpc_id" {
+default = ["vpc-a","vpc-b","vpc-c",vpc-d]
+
+}
+variable "subnets" {
+   default = ["subnet-a","subnet-b","subnet-c",subnet-d]
+}
+--------------------------------------------------------------------------------------------------------------------
+STEP 3:
+# terraform init
+# terraform plan 
+# terraform apply

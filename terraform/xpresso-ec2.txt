@@ -1,0 +1,46 @@
+resource "aws_instance" "test-xpresso" {
+  private_ip = "192.168.1.20"
+  ami           = "ami-09246ddb00c7c4fef"
+  key_name = "terraform"
+  subnet_id = "subnet-05949fcaea9bab0b0"
+  instance_type = "t3.xlarge"
+  security_groups= ["${aws_security_group.test-sg-xpresso.id}"]
+  tags= {
+    Name = "test-xpresso"
+  }
+}
+
+resource "aws_security_group" "test-sg-xpresso" {
+  name        = "test-sg-xpresso"
+  description = "security group for xpresso"
+  vpc_id      = "vpc-053d1170b7a929ec6"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/22"]
+  }
+
+ # outbound from jenkis server
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+ }
+}
+
+resource "aws_ebs_volume" "ebs_volume" {
+  availability_zone = "us-east-2b"
+  size              = 512
+  tags = {
+    Name = "ebs-volume"
+  }
+}
+
+resource "aws_volume_attachment" "ebc_volume_attachment" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.ebs_volume.id
+  instance_id = aws_instance.test-xpresso.id
+}
